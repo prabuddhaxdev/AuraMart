@@ -5,7 +5,7 @@ const cors = require("cors");
 
 mongoose
   .connect(
-    "mongodb+srv://prabuddha1749:random123@cluster0.g8xyvj9.mongodb.net/"
+    "MONGODB_URI"
   )
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
