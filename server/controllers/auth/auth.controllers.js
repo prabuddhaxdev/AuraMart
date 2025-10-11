@@ -1,10 +1,9 @@
-import { User } from "@/models/Users.models";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../../models/User");
 
-
-// register
-export const registerUser = async (req, res) => {
+//register
+const registerUser = async (req, res) => {
   const { userName, email, password } = req.body;
 
   try {
@@ -31,13 +30,13 @@ export const registerUser = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occurred",
+      message: "Some error occured",
     });
   }
 };
 
-// login
-export const loginUser = async (req, res) => {
+//login
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -45,7 +44,7 @@ export const loginUser = async (req, res) => {
     if (!checkUser)
       return res.json({
         success: false,
-        message: "User doesn't exist! Please register first",
+        message: "User doesn't exists! Please register first",
       });
 
     const checkPasswordMatch = await bcrypt.compare(
@@ -83,26 +82,27 @@ export const loginUser = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occurred",
+      message: "Some error occured",
     });
   }
 };
 
-// logout
-export const logoutUser = (req, res) => {
+//logout
+
+const logoutUser = (req, res) => {
   res.clearCookie("token").json({
     success: true,
     message: "Logged out successfully!",
   });
 };
 
-// auth middleware
-export const authMiddleware = async (req, res, next) => {
+//auth middleware
+const authMiddleware = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token)
     return res.status(401).json({
       success: false,
-      message: "Unauthorized user!",
+      message: "Unauthorised user!",
     });
 
   try {
@@ -112,7 +112,9 @@ export const authMiddleware = async (req, res, next) => {
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: "Unauthorized user!",
+      message: "Unauthorised user!",
     });
   }
 };
+
+module.exports = { registerUser, loginUser, logoutUser, authMiddleware };
