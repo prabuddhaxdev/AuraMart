@@ -26,7 +26,7 @@ function AuthLogin() {
 
       if (data?.success) {
         toast.success(data?.message || "Login successful!");
-        navigate("/"); // redirect to home/dashboard (adjust if needed)
+        navigate("/");
       } else {
         toast.error(data?.message || "Invalid credentials.");
       }
