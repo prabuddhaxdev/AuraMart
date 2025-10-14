@@ -1,11 +1,10 @@
+import CommonForm from "@/components/common/form";
+import { registerFormControls } from "@/config";
+import { registerUser } from "@/store/auth-slice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-import CommonForm from "@/components/common/form";
-import { registerFormControls } from "@/config";
-import { registerUser } from "@/store/auth-slice";
 
 const initialState = {
   userName: "",
@@ -18,24 +17,23 @@ function AuthRegister() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const onSubmit = async (event) => {
+  async function onSubmit(event) {
     event.preventDefault();
 
     try {
-      const result = await dispatch(registerUser(formData));
-      const data = result?.payload;
+      const data = await dispatch(registerUser(formData));
 
-      if (data?.success) {
-        toast.success(data?.message || "Registration successful!");
+      if (data?.payload?.success) {
+        toast.success(data?.payload?.message || "Registration successful!");
         navigate("/auth/login");
       } else {
-        toast.error(data?.message || "Registration failed.");
+        toast.error(data?.payload?.message || "Registration failed!");
       }
     } catch (error) {
-      console.error("Error during registration:", error);
       toast.error("Something went wrong. Please try again.");
+      console.error("Register error:", error);
     }
-  };
+  }
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
@@ -53,7 +51,6 @@ function AuthRegister() {
           </Link>
         </p>
       </div>
-
       <CommonForm
         formControls={registerFormControls}
         buttonText="Sign Up"
