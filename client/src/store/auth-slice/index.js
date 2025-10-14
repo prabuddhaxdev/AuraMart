@@ -11,7 +11,7 @@ const initialState = {
 // -------------------- ASYNC THUNKS --------------------
 
 export const registerUser = createAsyncThunk(
-  "auth/register",
+  "/auth/register",
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
@@ -27,7 +27,7 @@ export const registerUser = createAsyncThunk(
 );
 
 export const loginUser = createAsyncThunk(
-  "auth/login",
+  "/auth/login",
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
@@ -43,7 +43,7 @@ export const loginUser = createAsyncThunk(
 );
 
 export const logoutUser = createAsyncThunk(
-  "auth/logout",
+  "/auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.post(
@@ -59,7 +59,7 @@ export const logoutUser = createAsyncThunk(
 );
 
 export const checkAuth = createAsyncThunk(
-  "auth/checkAuth",
+  "/auth/checkAuth",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
