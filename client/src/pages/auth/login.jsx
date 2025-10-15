@@ -24,7 +24,7 @@ function AuthLogin() {
 
       if (data?.payload?.success) {
         toast.success(data?.payload?.message || "Login successful!");
-        navigate("/"); // ✅ Redirect after login — adjust path as needed
+        navigate("/");
       } else {
         toast.error(data?.payload?.message || "Invalid credentials!");
       }

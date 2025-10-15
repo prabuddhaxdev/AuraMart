@@ -32,11 +32,16 @@ function App() {
 
   if (isLoading) return <Skeleton className="w-[800] bg-black h-[600px]" />;
 
-  console.log(isLoading, user);
 
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>
+        <Route
+          path="/"
+          element={
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}></CheckAuth>
+          }
+        />
         <Route
           path="/auth"
           element={
@@ -57,10 +62,10 @@ function App() {
             </CheckAuth>
           }
         >
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="features" element={<AdminFeatures />} />
+          <Route path="dashboard" element={<AdminDashboard/>} />
+          <Route path="products" element={<AdminProducts/>} />
+          <Route path="orders" element={<AdminOrders/>} />
+          <Route path="features" element={<AdminFeatures/>} />
         </Route>
 
         <Route
