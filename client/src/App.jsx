@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "./components/ui/skeleton";
 
+
 function App() {
   const { user, isAuthenticated, isLoading } = useSelector(
     (state) => state.auth

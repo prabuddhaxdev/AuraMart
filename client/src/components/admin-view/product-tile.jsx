@@ -12,11 +12,17 @@ function AdminProductTile({
     <Card className="w-full max-w-sm mx-auto">
       <div>
         <div className="relative">
-          <img
-            src={product?.image}
-            alt={product?.title}
-            className="w-full h-[300px] object-cover rounded-t-lg"
-          />
+          {product?.image ? (
+            <img
+              src={product.image}
+              alt={product?.title || "Product image"}
+              className="w-full h-[300px] object-cover rounded-t-lg"
+            />
+          ) : (
+            <div className="w-full h-[300px] bg-gray-200 flex items-center justify-center rounded-t-lg text-gray-500">
+              No Image
+            </div>
+          )}
         </div>
         <CardContent>
           <h2 className="text-xl font-bold mb-2 mt-2">{product?.title}</h2>

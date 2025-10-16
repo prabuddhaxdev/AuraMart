@@ -40,64 +40,87 @@ function AdminProducts() {
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
+  const { productList } = useSelector((state) => state.adminProducts);
 
-  function onSubmit(event) {
+  // ✅ Form Submit Handler
+  const onSubmit = async (event) => {
     event.preventDefault();
 
-    currentEditedId !== null
-      ? dispatch(
+    try {
+      if (currentEditedId !== null) {
+        const resultAction = await dispatch(
           editProduct({
             id: currentEditedId,
-            formData,
+            formData: { ...formData, image: uploadedImageUrl },
           })
-        ).then((data) => {
-          console.log(data, "edit");
+        );
 
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setFormData(initialFormData);
-            setOpenCreateProductsDialog(false);
-            setCurrentEditedId(null);
-          }
-        })
-      : dispatch(
+        if (resultAction?.payload?.success) {
+          toast.success("Product updated successfully");
+          dispatch(fetchAllProducts());
+          resetForm();
+        } else {
+          toast.error("Failed to update product");
+        }
+      } else {
+        const resultAction = await dispatch(
           addNewProduct({
             ...formData,
             image: uploadedImageUrl,
           })
-        ).then((data) => {
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setOpenCreateProductsDialog(false);
-            setImageFile(null);
-            setFormData(initialFormData);
-            toast( "Product add successfully");
-          }
-        });
-  }
+        );
 
-  function handleDelete(getCurrentProductId) {
-    dispatch(deleteProduct(getCurrentProductId)).then((data) => {
-      if (data?.payload?.success) {
-        dispatch(fetchAllProducts());
+        if (resultAction?.payload?.success) {
+          toast.success("Product added successfully");
+          dispatch(fetchAllProducts());
+          resetForm();
+        } else {
+          toast.error("Failed to add product");
+        }
       }
-    });
-  }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Something went wrong");
+    }
+  };
 
-  function isFormValid() {
+  // ✅ Delete product handler
+  const handleDelete = async (productId) => {
+    try {
+      const resultAction = await dispatch(deleteProduct(productId));
+      if (resultAction?.payload?.success) {
+        toast.success("Product deleted successfully");
+        dispatch(fetchAllProducts());
+      } else {
+        toast.error("Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  // ✅ Helper to validate form
+  const isFormValid = () => {
     return Object.keys(formData)
-      .filter((currentKey) => currentKey !== "averageReview")
-      .map((key) => formData[key] !== "")
-      .every((item) => item);
-  }
+      .filter((key) => key !== "averageReview")
+      .every((key) => formData[key] !== "");
+  };
 
+  // ✅ Reset form helper
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setOpenCreateProductsDialog(false);
+    setCurrentEditedId(null);
+    setImageFile(null);
+    setUploadedImageUrl("");
+  };
+
+  // ✅ Fetch product list on mount
   useEffect(() => {
     dispatch(fetchAllProducts());
   }, [dispatch]);
-
-  console.log(formData, "productList");
 
   return (
     <Fragment>
@@ -106,25 +129,31 @@ function AdminProducts() {
           Add New Product
         </Button>
       </div>
+
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {productList && productList.length > 0
-          ? productList.map((productItem) => (
-              <AdminProductTile
-                setFormData={setFormData}
-                setOpenCreateProductsDialog={setOpenCreateProductsDialog}
-                setCurrentEditedId={setCurrentEditedId}
-                product={productItem}
-                handleDelete={handleDelete}
-              />
-            ))
-          : null}
+        {productList && productList.length > 0 ? (
+          productList.map((productItem) => (
+            <AdminProductTile
+              key={productItem._id || productItem.id}
+              setFormData={setFormData}
+              setOpenCreateProductsDialog={setOpenCreateProductsDialog}
+              setCurrentEditedId={setCurrentEditedId}
+              product={productItem}
+              handleDelete={handleDelete}
+            />
+          ))
+        ) : (
+          <p className="text-center col-span-full text-gray-500">
+            No products found.
+          </p>
+        )}
       </div>
+
       <Sheet
         open={openCreateProductsDialog}
-        onOpenChange={() => {
-          setOpenCreateProductsDialog(false);
-          setCurrentEditedId(null);
-          setFormData(initialFormData);
+        onOpenChange={(open) => {
+          if (!open) resetForm();
+          else setOpenCreateProductsDialog(true);
         }}
       >
         <SheetContent side="right" className="overflow-auto">
@@ -133,6 +162,7 @@ function AdminProducts() {
               {currentEditedId !== null ? "Edit Product" : "Add New Product"}
             </SheetTitle>
           </SheetHeader>
+
           <ProductImageUpload
             imageFile={imageFile}
             setImageFile={setImageFile}
@@ -142,14 +172,15 @@ function AdminProducts() {
             imageLoadingState={imageLoadingState}
             isEditMode={currentEditedId !== null}
           />
+
           <div className="py-6">
             <CommonForm
               onSubmit={onSubmit}
               formData={formData}
               setFormData={setFormData}
-              buttonText={currentEditedId !== null ? "Edit" : "Add"}
+              buttonText={currentEditedId !== null ? "Update" : "Add"}
               formControls={addProductFormElements}
-              isBtnDisabled={!isFormValid()}
+              isBtnDisabled={!isFormValid() || imageLoadingState}
             />
           </div>
         </SheetContent>
