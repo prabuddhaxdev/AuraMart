@@ -1,9 +1,5 @@
-import React from 'react'
-
 function AdminFeatures() {
-  return (
-    <div>AdminFeatures</div>
-  )
+  return <div>admin features</div>;
 }
 
-export default AdminFeatures
+export default AdminFeatures;
