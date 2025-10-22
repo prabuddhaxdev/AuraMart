@@ -7,16 +7,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new multer.memoryStorage();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 
 async function imageUploadUtil(file) {
-  const result = await cloudinary.uploader.upload(file, {
+  const b64 = Buffer.from(file.buffer).toString("base64");
+  const dataURI = `data:${file.mimetype};base64,${b64}`;
+
+  const result = await cloudinary.uploader.upload(dataURI, {
     resource_type: "auto",
   });
 
   return result;
 }
-
-const upload = multer({ storage });
 
 module.exports = { upload, imageUploadUtil };

@@ -1,26 +1,33 @@
 const { imageUploadUtil } = require("../../helpers/cloudinary");
 const Product = require("../../models/Product");
 
+// ---------- Upload Image ----------
 const handleImageUpload = async (req, res) => {
   try {
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const url = "data:" + req.file.mimetype + ";base64," + b64;
-    const result = await imageUploadUtil(url);
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
 
-    res.json({
+    const result = await imageUploadUtil(req.file);
+
+    res.status(200).json({
       success: true,
       result,
     });
   } catch (error) {
-    console.log(error);
-    res.json({
+    console.error("Error uploading image:", error);
+    res.status(500).json({
       success: false,
-      message: "Error occurred",
+      message: "Error occurred during upload",
+      error: error.message,
     });
   }
 };
 
-//add a new product
+// ---------- Add Product ----------
 const addProduct = async (req, res) => {
   try {
     const {
@@ -35,9 +42,7 @@ const addProduct = async (req, res) => {
       averageReview,
     } = req.body;
 
-    console.log(averageReview, "averageReview");
-
-    const newlyCreatedProduct = new Product({
+    const newProduct = new Product({
       image,
       title,
       description,
@@ -49,39 +54,39 @@ const addProduct = async (req, res) => {
       averageReview,
     });
 
-    await newlyCreatedProduct.save();
+    await newProduct.save();
+
     res.status(201).json({
       success: true,
-      data: newlyCreatedProduct,
+      data: newProduct,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Error occurred",
+      message: "Error occurred while adding product",
     });
   }
 };
 
-//fetch all products
-
+// ---------- Fetch All Products ----------
 const fetchAllProducts = async (req, res) => {
   try {
-    const listOfProducts = await Product.find({});
+    const products = await Product.find({});
     res.status(200).json({
       success: true,
-      data: listOfProducts,
+      data: products,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Error occurred",
+      message: "Error occurred while fetching products",
     });
   }
 };
 
-//edit a product
+// ---------- Edit Product ----------
 const editProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -97,59 +102,61 @@ const editProduct = async (req, res) => {
       averageReview,
     } = req.body;
 
-    let findProduct = await Product.findById(id);
-    if (!findProduct)
+    const product = await Product.findById(id);
+    if (!product) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
+    }
 
-    findProduct.title = title || findProduct.title;
-    findProduct.description = description || findProduct.description;
-    findProduct.category = category || findProduct.category;
-    findProduct.brand = brand || findProduct.brand;
-    findProduct.price = price === "" ? 0 : price || findProduct.price;
-    findProduct.salePrice =
-      salePrice === "" ? 0 : salePrice || findProduct.salePrice;
-    findProduct.totalStock = totalStock || findProduct.totalStock;
-    findProduct.image = image || findProduct.image;
-    findProduct.averageReview = averageReview || findProduct.averageReview;
+    product.title = title || product.title;
+    product.description = description || product.description;
+    product.category = category || product.category;
+    product.brand = brand || product.brand;
+    product.price = price === "" ? 0 : price || product.price;
+    product.salePrice = salePrice === "" ? 0 : salePrice || product.salePrice;
+    product.totalStock = totalStock || product.totalStock;
+    product.image = image || product.image;
+    product.averageReview = averageReview || product.averageReview;
 
-    await findProduct.save();
+    await product.save();
+
     res.status(200).json({
       success: true,
-      data: findProduct,
+      data: product,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Error occurred",
+      message: "Error occurred while editing product",
     });
   }
 };
 
-//delete a product
+// ---------- Delete Product ----------
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByIdAndDelete(id);
+    const deleted = await Product.findByIdAndDelete(id);
 
-    if (!product)
+    if (!deleted) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
+    }
 
     res.status(200).json({
       success: true,
-      message: "Product delete successfully",
+      message: "Product deleted successfully",
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.status(500).json({
       success: false,
-      message: "Error occurred",
+      message: "Error occurred while deleting product",
     });
   }
 };
